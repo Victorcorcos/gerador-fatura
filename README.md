@@ -18,16 +18,37 @@ gerador-fatura/
 
 ## Instalação
 
-1. Clone o repositorio
+### Pré-requisitos
+- Python **3.10 ou superior**
+- `git` instalado
 
-    ```bash
-    git clone https://github.com/AlbertoLucass/gerador-fatura.git
-    ```
+### Clone o repositório
 
-2. Instale as dependências:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+git clone https://github.com/AlbertoLucass/gerador-fatura.git
+cd gerador-fatura
+```
+
+### Crie e ative um ambiente virtual
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Linux/macOS
+# ou
+venv\Scripts\activate.bat  # Windows
+```
+
+### Atualize o gerenciador de pacotes
+
+```bash
+pip install --upgrade pip
+```
+
+### Instale as dependências
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Configuração
 
@@ -53,7 +74,6 @@ MES_COMPLETO = "06/2025"  # Formato: MM/YYYY
 ### Informações Pessoais
 
 Edite a seção `INFO_FATURA` com seus dados:
-
 - Razão social
 - CNPJ
 - Endereço
@@ -69,7 +89,6 @@ python gerador_fatura.py
 ```
 
 O sistema irá:
-
 1. Fazer login na API
 2. Buscar dados de timesheet do período configurado
 3. Processar os dados
@@ -78,40 +97,30 @@ O sistema irá:
 ## Estrutura dos Módulos
 
 ### `gerador_fatura.py`
-
 Arquivo principal que orquestra todo o processo.
 
 ### `config.py`
-
 Contém todas as configurações, credenciais e dados pessoais.
 
 ### `cliente_api`
-
 Responsável pela comunicação com a API GraphQL:
-
 - Autenticação
 - Consultas de dados
 
 ### `processar_dados.py`
-
 Processa os dados brutos da API:
-
 - Filtragem por período
 - Agrupamento por tags
 - Formatação de dados
 
 ### `gerar_PDF.py`
-
 Gera o PDF da fatura:
-
 - Formatação do documento
 - Tabelas e estilos
 - Cálculos de valores
 
 ### `utils_data.py`
-
 Utilitários para manipulação de datas:
-
 - Cálculo de períodos
 - Formatação de nomes de arquivo
 - Validação de datas
@@ -129,7 +138,6 @@ TAGS_INTERESSE = ['development', 'meeting', 'tests', 'nova_tag']
 ### Modificar Layout do PDF
 
 Edite os métodos em `gerar_PDF.py` para personalizar:
-
 - Estilos de texto
 - Cores das tabelas
 - Estrutura do documento
@@ -141,7 +149,6 @@ Modifique os métodos em `utils_data.py` para diferentes formatos.
 ## Tratamento de Erros
 
 O sistema possui tratamento de erros para:
-
 - Falhas de autenticação
 - Problemas de conexão com API
 - Dados inválidos
@@ -169,7 +176,6 @@ Exemplo: `Fatura_3_01-06-2025_a_30-06-2025.pdf`
 ### Erro de Autenticação
 
 Verifique se:
-
 - Email e senha estão corretos no `config.py`
 - A API está acessível
 - As credenciais têm permissões adequadas
@@ -177,7 +183,6 @@ Verifique se:
 ### Nenhum Dado Encontrado
 
 Verifique se:
-
 - O período está correto
 - Existem dados de timesheet para o período
 - As tags estão configuradas corretamente
@@ -185,8 +190,6 @@ Verifique se:
 ### Erro na Geração do PDF
 
 Verifique se:
-
 - Todas as dependências estão instaladas
 - Há permissão de escrita no diretório
 - Os dados processados são válidos
-
