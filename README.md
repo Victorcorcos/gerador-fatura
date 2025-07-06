@@ -5,7 +5,7 @@ Sistema automatizado para geração de faturas baseado em dados de timesheet obt
 ## Estrutura do Projeto
 
 ```
-gerador_fatura/
+gerador-fatura/
 ├── gerador_fatura.py     # Arquivo principal
 ├── config.py             # Configurações e dados pessoais
 ├── cliente_api           # Cliente para interação com API
