@@ -54,33 +54,45 @@ pip install -r requirements.txt
 
 ## Configuração
 
-Antes de usar o sistema, configure o arquivo `config.py`:
+### Variáveis de Ambiente
 
-### Credenciais de Login
+O sistema agora utiliza variáveis de ambiente para configurações sensíveis. Crie um arquivo `.env` baseado no template `.env.example`:
 
-```python
-LOGIN_CREDENTIALS = {
-    "email": "seu.email@exemplo.com",
-    "password": "sua_senha_aqui"
-}
+```bash
+cp .env.example .env
 ```
 
-### Informações Pessoais
+Edite o arquivo `.env` com suas informações:
 
-Edite a seção `INFO_FATURA` com seus dados:
-- Razão social
-- CNPJ
-- Endereço
-- Dados do cliente
-- etc.
+```bash
+# API Credentials
+EMAIL=seu.email@exemplo.com
+PASSWORD=sua_senha_aqui
 
-### Configurações da Fatura
+# Company Information
+RAZAO_SOCIAL=Sua Empresa LTDA
+CNPJ=00.000.000/0001-00
+ENDERECO=Seu Endereço Completo
+PIX=seu-pix@email.com
 
-```python
-NUMERO_FATURA = "1"
-TAXA_HORA = 1.0
-MES_COMPLETO = "06/2025" # Formato: MM/YYYY
+# Client Information
+CLIENTE_NOME=Nome do Cliente LTDA
+CLIENTE_CNPJ=00.000.000/0001-00
+CLIENTE_ENDERECO=Endereço do Cliente
+
+# Invoice Configuration
+NUMERO_FATURA=1
+TAXA_HORA=60.0
+MES_COMPLETO=08/2025
+TAGS_INTERESSE=development,meeting
 ```
+
+**Configurações importantes:**
+- `MES_COMPLETO`: Período da fatura no formato MM/YYYY (se não especificado, usa o mês anterior automaticamente)
+- `TAXA_HORA`: Valor da hora trabalhada 
+- `TAGS_INTERESSE`: Tags de timesheet separadas por vírgula (ex: `development,meeting,tests`)
+
+⚠️ **Importante**: O arquivo `.env` contém informações sensíveis e não deve ser commitado no git. Ele já está incluído no `.gitignore`.
 ## Uso
 
 Execute o arquivo principal:
@@ -173,6 +185,7 @@ Exemplo: `faturas/Fatura_3_01-06-2025_a_30-06-2025.pdf`
 - `pandas`: Para manipulação de dados
 - `reportlab`: Para geração de PDF
 - `python-dateutil`: Para manipulação de datas
+- `python-dotenv`: Para carregamento de variáveis de ambiente
 
 ## Troubleshooting
 
