@@ -13,6 +13,7 @@ gerador-fatura/
 ├── gerar_PDF.py          # Geração de PDF
 ├── utils_data.py         # Utilitários de data
 ├── requirements.txt      # Dependências
+├── faturas/              # Diretório onde os PDFs são salvos
 └── README.md             # Este arquivo
 ```
 
@@ -64,14 +65,6 @@ LOGIN_CREDENTIALS = {
 }
 ```
 
-### Configurações da Fatura
-
-```python
-NUMERO_FATURA = "3"
-TAXA_HORA = 1.0
-MES_COMPLETO = "06/2025"  # Formato: MM/YYYY
-```
-
 ### Informações Pessoais
 
 Edite a seção `INFO_FATURA` com seus dados:
@@ -81,12 +74,21 @@ Edite a seção `INFO_FATURA` com seus dados:
 - Dados do cliente
 - etc.
 
+### Configurações da Fatura
+
+```python
+NUMERO_FATURA = "1"
+TAXA_HORA = 1.0
+MES_COMPLETO = "06/2025" # Formato: MM/YYYY
+```
 ## Uso
 
 Execute o arquivo principal:
 
 ```bash
 python gerador_fatura.py
+# ou
+python3 gerador_fatura.py
 ```
 
 O sistema irá:
@@ -157,13 +159,13 @@ O sistema possui tratamento de erros para:
 
 ## Arquivos Gerados
 
-Os PDFs são salvos no formato:
+Os PDFs são automaticamente salvos no diretório `faturas/` (criado automaticamente se não existir) no formato:
 
 ```
-Fatura_[NUMERO]_[DATA_INICIO]_a_[DATA_FIM].pdf
+faturas/Fatura_[NUMERO]_[DATA_INICIO]_a_[DATA_FIM].pdf
 ```
 
-Exemplo: `Fatura_3_01-06-2025_a_30-06-2025.pdf`
+Exemplo: `faturas/Fatura_3_01-06-2025_a_30-06-2025.pdf`
 
 ## Dependências
 
