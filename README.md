@@ -20,7 +20,8 @@ gerador-fatura/
 
 ### Pré-requisitos
 - Python **3.10 ou superior**
-- `git` instalado
+- Python 3.10 venv instalado (`apt install python3.10-venv`)
+- `git` instalado (`sudo apt install -y git`)
 
 ### Clone o repositório
 
