@@ -150,9 +150,15 @@ class GerarPDF:
             if dados.empty:
                 continue
             
+            # Totais por task
+            horas_task = float(dados['duration'].sum())
+            total_task = horas_task * taxa_hora
+
             dados_tabela.append([
                 Paragraph(f"<b>{task}</b>", self.estilos['tag']),
-                "", "", ""
+                f"{taxa_hora:.2f}".replace('.', ','),
+                f"{horas_task:.2f}".replace('.', ','),
+                f"{total_task:.2f}".replace('.', ',')
             ])
             
             for _, row in dados.iterrows():
