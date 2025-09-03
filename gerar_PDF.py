@@ -219,6 +219,14 @@ class GerarPDF:
                 ""
             ])
 
+        # Linha de totalização das horas mensais somadas de todas as tasks
+        dados.append([
+            Paragraph("Horas Mensais (TOTAL)", self.estilos['normal']),
+            f"{total_horas:.2f}".replace('.', ','),
+            "",
+            ""
+        ])
+
         # Linha Horas Totais (Cobradas) - baseada nas horas do mês (config)
         try:
             # Usa a data de início do período para identificar o mês (formato dd/mm/YYYY)
