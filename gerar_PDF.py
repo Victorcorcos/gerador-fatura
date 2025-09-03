@@ -286,10 +286,12 @@ class GerarPDF:
         # Monta mensagem explicativa para a anotação
         def fmt2(v):
             return f"{v:.2f}".replace('.', ',')
+        diff = total_horas - float(horas_cobradas)
         explicacao = (
-            f"Cálculo das Horas Extras:\n"
-            f"HORAS_EXTRA ({fmt2(float(HORAS_EXTRA))}) + "
-            f"(Horas Mensais (TOTAL) ({fmt2(total_horas)}) - Horas Totais (Cobradas) ({fmt2(horas_cobradas)})) = "
+            "Cálculo das Horas Extras:\n"
+            "HORAS_EXTRA + (Horas Mensais (TOTAL) - Horas Totais (Cobradas))\n"
+            f"{fmt2(float(HORAS_EXTRA))} + ({fmt2(total_horas)} - {fmt2(horas_cobradas)})\n"
+            f"{fmt2(float(HORAS_EXTRA))} + {fmt2(diff)}\n"
             f"{fmt2(horas_extras)}"
         )
 
