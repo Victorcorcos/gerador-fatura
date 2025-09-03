@@ -5,7 +5,7 @@ Responsável por criar o documento PDF com os dados processados.
 """
 
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Flowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -48,7 +48,7 @@ class GerarPDF:
         doc.build(elementos)
         
         return nome_arquivo, total_geral
-    
+
     def _criar_estilos(self):
         estilos = getSampleStyleSheet()
         
@@ -94,7 +94,7 @@ class GerarPDF:
             return f"R$ {valor:,.2f}"
         except Exception:
             return f"R$ {valor:.2f}"
-    
+
     def _criar_tabela_emissor_cliente(self, info):
         elementos = []
         
@@ -126,7 +126,7 @@ class GerarPDF:
         elementos.extend([tabela_cliente, Spacer(1, 0.2 * inch)])
         
         return elementos
-    
+
     def _criar_informacoes_fatura(self, info):
         elementos = []
         data_fatura = datetime.today().strftime('%d/%m/%Y')
@@ -144,14 +144,14 @@ class GerarPDF:
         elementos.extend([tabela_info, Spacer(1, 0.3 * inch)])
         
         return elementos
-    
+
     def _estilo_tabela_simples(self):
         return TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('TOPPADDING', (0, 0), (-1, -1), 2),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
         ])
-    
+
     def _criar_tabela_servicos(self, resultados, taxa_hora):
         cabecalho = ["Task", "Taxa por hora (R$)", "Horas", "Total (R$)"]
         dados_tabela = [cabecalho]
@@ -264,7 +264,7 @@ class GerarPDF:
         ])
         row_internet = len(dados) - 1
 
-        # Linha Total (Cobrado) - consolidado final (valor total em branco conforme instrução)
+        # Linha Total (Cobrado) - consolidado final
         # Total (Cobrado) final: soma de Horas Totais (Cobradas) + Internet
         total_cobrado_final = total_cobrado + internet_valor
         dados.append([
@@ -274,7 +274,31 @@ class GerarPDF:
             self._fmt_brl(total_cobrado_final)
         ])
 
-        tabela = Table(dados, colWidths=[220, 80, 100, 120])
+        # Calcula índice da linha "Horas Extras" para anotar a célula de horas (coluna 1)
+        row_idx_horas_extras = None
+        for i, row in enumerate(dados):
+            if isinstance(row[0], Paragraph):
+                txt = row[0].text
+                if 'Horas Extras' in txt and 'TOTAL' not in txt and 'Totais' not in txt:
+                    row_idx_horas_extras = i
+                    break
+
+        # Monta mensagem explicativa para a anotação
+        def fmt2(v):
+            return f"{v:.2f}".replace('.', ',')
+        explicacao = (
+            f"Cálculo das Horas Extras:\n"
+            f"HORAS_EXTRA ({fmt2(float(HORAS_EXTRA))}) + "
+            f"(Horas Mensais (TOTAL) ({fmt2(total_horas)}) - Horas Totais (Cobradas) ({fmt2(horas_cobradas)})) = "
+            f"{fmt2(horas_extras)}"
+        )
+
+        annotations = []
+        if row_idx_horas_extras is not None:
+            # coluna 1 corresponde a "Horas (H)"
+            annotations.append({'row': row_idx_horas_extras, 'col': 1, 'text': explicacao})
+
+        tabela = AnnotatedTable(dados, colWidths=[220, 80, 100, 120], annotations=annotations)
         estilo = TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -303,7 +327,7 @@ class GerarPDF:
         estilo.add('LINEABOVE', (0, last_row), (-1, last_row), 1, colors.black)
         tabela.setStyle(estilo)
         return tabela
-    
+
     def _estilo_tabela_servicos(self, num_linhas, resultados):
         estilo = TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -336,3 +360,44 @@ class GerarPDF:
                 linha += len(resultados[task]) + 1
                 
         return estilo
+
+class AnnotatedTable(Table):
+    """
+    Tabela com suporte a anotações (sticky notes) posicionadas em células específicas.
+    annotations: lista de dicts { 'row': int, 'col': int, 'text': str }
+    """
+    def __init__(self, data, colWidths=None, rowHeights=None, annotations=None, **kwargs):
+        super().__init__(data, colWidths=colWidths, rowHeights=rowHeights, **kwargs)
+        self._annotations = annotations or []
+
+    def draw(self):
+        # Desenha a tabela normalmente
+        super().draw()
+        # Após desenhar, adiciona anotações
+        canv = self.canv
+        # Garantir que col/row widths estão calculados
+        colWidths = self._colWidths
+        rowHeights = self._rowHeights
+        total_height = sum(rowHeights)
+
+        for ann in self._annotations:
+            r = ann.get('row')
+            c = ann.get('col')
+            text = ann.get('text', '')
+            try:
+                # Converter índice de linha (0=top) para coordenadas relativas à base da tabela
+                y_top = sum(rowHeights[:r+1])
+                y_bottom = sum(rowHeights[:r])
+                # Mas como a origem é bottom-left, invertemos em relação à altura total
+                y0 = total_height - y_top
+                y1 = total_height - y_bottom
+                x0 = sum(colWidths[:c])
+                x1 = sum(colWidths[:c+1])
+                # Reduz a área alvo para ficar bem dentro da célula
+                pad = 2
+                x0 += pad; x1 -= pad; y0 += pad; y1 -= pad
+                # Usa highlightAnnotation (sem ícone grande), mostrando o texto ao passar o mouse
+                canv.highlightAnnotation(text, Rect=(x0, y0, x1, y1), Color=[1, 1, 0.85], relative=1)
+            except Exception:
+                # Se algo falhar, ignora silenciosamente para não quebrar a geração do PDF
+                continue
