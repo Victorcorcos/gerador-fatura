@@ -213,7 +213,7 @@ class GerarPDF:
                 ""
             ])
 
-        # Linha Total (Cobrado) - baseada nas horas do mês (config)
+        # Linha Horas Totais (Cobradas) - baseada nas horas do mês (config)
         try:
             # Usa a data de início do período para identificar o mês (formato dd/mm/YYYY)
             data_inicio = info_fatura.get('data_desenvolvimento_inicio')
@@ -223,18 +223,31 @@ class GerarPDF:
             horas_cobradas = 0
         total_cobrado = horas_cobradas * taxa_hora
         dados.append([
-            Paragraph("<b>Total (Cobrado)</b>", self.estilos['normal']),
+            Paragraph("<b>Horas Totais (Cobradas)</b>", self.estilos['normal']),
             f"{horas_cobradas:.2f}".replace('.', ','),
             f"{taxa_hora:.2f}".replace('.', ','),
             f"{total_cobrado:.2f}".replace('.', ',')
         ])
+        row_total_cobrado = len(dados) - 1
 
-        # Linha Total Geral
+        # Linha Internet (valor fixo 120, sem horas e taxa)
+        internet_valor = 120.0
         dados.append([
-            Paragraph("<b>Total Geral</b>", self.estilos['normal']),
-            f"{total_horas:.2f}".replace('.', ','),
+            Paragraph("Internet", self.estilos['normal']),
             "",
-            ""
+            "",
+            f"{internet_valor:.2f}".replace('.', ',')
+        ])
+        row_internet = len(dados) - 1
+
+        # Linha Total (Cobrado) - consolidado final (valor total em branco conforme instrução)
+        # Total (Cobrado) final: soma de Horas Totais (Cobradas) + Internet
+        total_cobrado_final = total_cobrado + internet_valor
+        dados.append([
+            Paragraph("<b>Total (Cobrado)</b>", self.estilos['normal']),
+            "",
+            f"{taxa_hora:.2f}".replace('.', ','),
+            f"{total_cobrado_final:.2f}".replace('.', ',')
         ])
 
         tabela = Table(dados, colWidths=[220, 80, 100, 120])
@@ -255,10 +268,10 @@ class GerarPDF:
         ])
         # Estilo para linhas finais: Total (Cobrado) e Total Geral
         last_row = len(dados) - 1  # Total Geral
-        cobr_row = len(dados) - 2  # Total (Cobrado)
-        estilo.add('BACKGROUND', (0, cobr_row), (-1, cobr_row), colors.lightgrey)
-        estilo.add('FONTNAME', (0, cobr_row), (-1, cobr_row), 'Helvetica-Bold')
-        estilo.add('LINEABOVE', (0, cobr_row), (-1, cobr_row), 1, colors.black)
+        # Aplica destaque ao Total (Cobrado) e Total Geral
+        estilo.add('BACKGROUND', (0, row_total_cobrado), (-1, row_total_cobrado), colors.lightgrey)
+        estilo.add('FONTNAME', (0, row_total_cobrado), (-1, row_total_cobrado), 'Helvetica-Bold')
+        estilo.add('LINEABOVE', (0, row_total_cobrado), (-1, row_total_cobrado), 1, colors.black)
         estilo.add('BACKGROUND', (0, last_row), (-1, last_row), colors.lightgrey)
         estilo.add('FONTNAME', (0, last_row), (-1, last_row), 'Helvetica-Bold')
         estilo.add('LINEABOVE', (0, last_row), (-1, last_row), 1, colors.black)
