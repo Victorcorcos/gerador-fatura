@@ -47,6 +47,16 @@ PDF_CONFIG = {
 
 TAGS_INTERESSE = os.getenv("TAGS_INTERESSE", "development,meeting").split(",")
 
+# Horas extras manuais (podem variar por mês), padrão 0.0
+def _env_float(name: str, default: float = 0.0) -> float:
+    try:
+        val = os.getenv(name)
+        return float(val) if val not in (None, "") else default
+    except Exception:
+        return default
+
+HORAS_EXTRA = _env_float("HORAS_EXTRA", 0.0)
+
 # Dias úteis por mês (substituível por variáveis de ambiente WORKING_DAYS_*)
 _DEFAULT_WORKING_DAYS = {
     'JANUARY': 21,

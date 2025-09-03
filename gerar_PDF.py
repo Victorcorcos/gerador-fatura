@@ -11,7 +11,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from datetime import datetime
-from config import PDF_CONFIG, WORKING_HOURS_BY_MONTH
+from config import PDF_CONFIG, WORKING_HOURS_BY_MONTH, HORAS_EXTRA
 
 
 class GerarPDF:
@@ -207,6 +207,14 @@ class GerarPDF:
         dados = [cabecalho]
         total_horas = 0.0
 
+        # Determina horas cobradas do mês (para usar em diferentes linhas)
+        try:
+            data_inicio = info_fatura.get('data_desenvolvimento_inicio')
+            mes_codigo = data_inicio.split('/')[1] if isinstance(data_inicio, str) and '/' in data_inicio else None
+            horas_cobradas = WORKING_HOURS_BY_MONTH.get(mes_codigo, 0)
+        except Exception:
+            horas_cobradas = 0
+
         for task, df_task in resultados.items():
             if df_task.empty:
                 continue
@@ -227,14 +235,16 @@ class GerarPDF:
             ""
         ])
 
+        # Linha Horas Extras = HORAS_EXTRA + (TOTAL - COBRADAS)
+        horas_extras = float(HORAS_EXTRA) + (total_horas - float(horas_cobradas))
+        dados.append([
+            Paragraph("Horas Extras", self.estilos['normal']),
+            f"{horas_extras:.2f}".replace('.', ','),
+            "",
+            ""
+        ])
+
         # Linha Horas Totais (Cobradas) - baseada nas horas do mês (config)
-        try:
-            # Usa a data de início do período para identificar o mês (formato dd/mm/YYYY)
-            data_inicio = info_fatura.get('data_desenvolvimento_inicio')
-            mes_codigo = data_inicio.split('/')[1] if isinstance(data_inicio, str) and '/' in data_inicio else None
-            horas_cobradas = WORKING_HOURS_BY_MONTH.get(mes_codigo, 0)
-        except Exception:
-            horas_cobradas = 0
         total_cobrado = horas_cobradas * taxa_hora
         dados.append([
             Paragraph("<b>Horas Totais (Cobradas)</b>", self.estilos['normal']),
