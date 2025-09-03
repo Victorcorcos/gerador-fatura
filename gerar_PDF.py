@@ -146,12 +146,12 @@ class GerarPDF:
         dados_tabela = [cabecalho]
         total_geral = total_horas = 0
 
-        for tag, dados in resultados.items():
+        for task, dados in resultados.items():
             if dados.empty:
                 continue
             
             dados_tabela.append([
-                Paragraph(f"<b>{tag.capitalize()}</b>", self.estilos['tag']),
+                Paragraph(f"<b>{task}</b>", self.estilos['tag']),
                 "", "", ""
             ])
             
@@ -203,12 +203,12 @@ class GerarPDF:
         ])
         
         linha = 1
-        for tag in resultados:
-            if not resultados[tag].empty:
+        for task in resultados:
+            if not resultados[task].empty:
                 estilo.add('BACKGROUND', (0, linha), (-1, linha), colors.lightgrey)
                 estilo.add('FONTSIZE', (0, linha), (-1, linha), 12)
                 estilo.add('FONTNAME', (0, linha), (-1, linha), 'Helvetica-Bold')
                 estilo.add('TEXTCOLOR', (0, linha), (-1, linha), colors.black)
-                linha += len(resultados[tag]) + 1
+                linha += len(resultados[task]) + 1
                 
         return estilo
