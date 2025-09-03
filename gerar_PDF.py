@@ -88,6 +88,12 @@ class GerarPDF:
                 alignment=TA_CENTER
             )
         }
+
+    def _fmt_brl(self, valor: float) -> str:
+        try:
+            return f"R$ {valor:,.2f}"
+        except Exception:
+            return f"R$ {valor:.2f}"
     
     def _criar_tabela_emissor_cliente(self, info):
         elementos = []
@@ -225,8 +231,8 @@ class GerarPDF:
         dados.append([
             Paragraph("<b>Horas Totais (Cobradas)</b>", self.estilos['normal']),
             f"{horas_cobradas:.2f}".replace('.', ','),
-            f"{taxa_hora:.2f}".replace('.', ','),
-            f"{total_cobrado:.2f}".replace('.', ',')
+            self._fmt_brl(taxa_hora),
+            self._fmt_brl(total_cobrado)
         ])
         row_total_cobrado = len(dados) - 1
 
@@ -236,7 +242,7 @@ class GerarPDF:
             Paragraph("Internet", self.estilos['normal']),
             "",
             "",
-            f"{internet_valor:.2f}".replace('.', ',')
+            self._fmt_brl(internet_valor)
         ])
         row_internet = len(dados) - 1
 
@@ -246,8 +252,8 @@ class GerarPDF:
         dados.append([
             Paragraph("<b>Total (Cobrado)</b>", self.estilos['normal']),
             "",
-            f"{taxa_hora:.2f}".replace('.', ','),
-            f"{total_cobrado_final:.2f}".replace('.', ',')
+            "",
+            self._fmt_brl(total_cobrado_final)
         ])
 
         tabela = Table(dados, colWidths=[220, 80, 100, 120])
@@ -272,6 +278,8 @@ class GerarPDF:
         estilo.add('BACKGROUND', (0, row_total_cobrado), (-1, row_total_cobrado), colors.lightgrey)
         estilo.add('FONTNAME', (0, row_total_cobrado), (-1, row_total_cobrado), 'Helvetica-Bold')
         estilo.add('LINEABOVE', (0, row_total_cobrado), (-1, row_total_cobrado), 1, colors.black)
+        # Internet: fundo cinza como as demais linhas de totalização
+        estilo.add('BACKGROUND', (0, row_internet), (-1, row_internet), colors.lightgrey)
         estilo.add('BACKGROUND', (0, last_row), (-1, last_row), colors.lightgrey)
         estilo.add('FONTNAME', (0, last_row), (-1, last_row), 'Helvetica-Bold')
         estilo.add('LINEABOVE', (0, last_row), (-1, last_row), 1, colors.black)
