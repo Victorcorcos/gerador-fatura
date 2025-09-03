@@ -39,6 +39,11 @@ class GerarPDF:
                                  self.estilos['subtitulo']))
         tabela_servicos, total_geral = self._criar_tabela_servicos(resultados, taxa_hora)
         elementos.extend([tabela_servicos, Spacer(1, 0.5 * inch)])
+
+        # Seção de resumo por task
+        elementos.append(Paragraph("<b>Totais</b>", self.estilos['subtitulo']))
+        tabela_resumo = self._criar_tabela_resumo(resultados, taxa_hora)
+        elementos.extend([tabela_resumo, Spacer(1, 0.3 * inch)])
         
         doc.build(elementos)
         
@@ -185,6 +190,63 @@ class GerarPDF:
         tabela.setStyle(estilo)
         
         return tabela, total_geral
+
+    def _criar_tabela_resumo(self, resultados, taxa_hora):
+        cabecalho = [
+            "Categoria",
+            "Horas (H)",
+            "Taxa por hora (R$)",
+            "Valor Total (R$)"
+        ]
+        dados = [cabecalho]
+        total_horas = 0.0
+        total_valor = 0.0
+
+        for task, df_task in resultados.items():
+            if df_task.empty:
+                continue
+            horas = float(df_task['duration'].sum())
+            total = horas * taxa_hora
+            total_horas += horas
+            total_valor += total
+            dados.append([
+                Paragraph(f"Horas Mensais ({task})", self.estilos['normal']),
+                f"{horas:.2f}".replace('.', ','),
+                f"{taxa_hora:.2f}".replace('.', ','),
+                f"{total:.2f}".replace('.', ',')
+            ])
+
+        # Linha Total Geral
+        dados.append([
+            Paragraph("<b>Total Geral</b>", self.estilos['normal']),
+            f"{total_horas:.2f}".replace('.', ','),
+            f"{taxa_hora:.2f}".replace('.', ','),
+            f"{total_valor:.2f}".replace('.', ',')
+        ])
+
+        tabela = Table(dados, colWidths=[220, 80, 100, 120])
+        estilo = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+        ])
+        # Estilo para a última linha (Total Geral)
+        last_row = len(dados) - 1
+        estilo.add('BACKGROUND', (0, last_row), (-1, last_row), colors.lightgrey)
+        estilo.add('FONTNAME', (0, last_row), (-1, last_row), 'Helvetica-Bold')
+        estilo.add('LINEABOVE', (0, last_row), (-1, last_row), 1, colors.black)
+        tabela.setStyle(estilo)
+        return tabela
     
     def _estilo_tabela_servicos(self, num_linhas, resultados):
         estilo = TableStyle([
