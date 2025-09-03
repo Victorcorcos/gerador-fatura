@@ -167,9 +167,9 @@ class GerarPDF:
 
             dados_tabela.append([
                 Paragraph(f"<b>{task}</b>", self.estilos['tag']),
-                f"{taxa_hora:.2f}".replace('.', ','),
+                self._fmt_brl(taxa_hora),
                 f"{horas_task:.2f}".replace('.', ','),
-                f"{total_task:.2f}".replace('.', ',')
+                self._fmt_brl(total_task)
             ])
             
             for _, row in dados.iterrows():
@@ -180,16 +180,10 @@ class GerarPDF:
                 
                 dados_tabela.append([
                     Paragraph(row['description'], self.estilos['descricao']),
-                    f"{taxa_hora:.2f}".replace('.', ','),
+                    self._fmt_brl(taxa_hora),
                     f"{duracao:.2f}".replace('.', ','),
-                    f"{total_linha:.2f}".replace('.', ',')
+                    self._fmt_brl(total_linha)
                 ])
-
-        dados_tabela.append([
-            "", "",
-            Paragraph(f"<b>{total_horas:.2f}</b>".replace('.', ','), self.estilos['descricao']),
-            Paragraph(f"<b>R$ {total_geral:.2f}</b>".replace('.', ','), self.estilos['descricao'])
-        ])
 
         tabela = Table(dados_tabela, colWidths=[200, 100, 80, 120])
         estilo = self._estilo_tabela_servicos(len(dados_tabela), resultados)
@@ -347,9 +341,7 @@ class GerarPDF:
             ('ALIGN', (1, 1), (1, -1), 'CENTER'),
             ('ALIGN', (2, 1), (2, -1), 'CENTER'),
             ('ALIGN', (3, 1), (3, -1), 'CENTER'),
-            ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey),
-            ('LINEBELOW', (0, -2), (-1, -2), 1, colors.black),
-            ('LINEABOVE', (0, -1), (-1, -1), 1, colors.black)
+            # Removido estilo especial da última linha pois não há linha de totais aqui
         ])
         
         linha = 1
