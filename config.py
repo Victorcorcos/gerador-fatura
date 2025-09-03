@@ -46,3 +46,45 @@ PDF_CONFIG = {
 }
 
 TAGS_INTERESSE = os.getenv("TAGS_INTERESSE", "development,meeting").split(",")
+
+# Dias úteis por mês (substituível por variáveis de ambiente WORKING_DAYS_*)
+_DEFAULT_WORKING_DAYS = {
+    'JANUARY': 21,
+    'FEBRUARY': 20,
+    'MARCH': 22,
+    'APRIL': 19,
+    'MAY': 22,
+    'JUNE': 21,
+    'JULY': 21,
+    'AUGUST': 23,
+    'SEPTEMBER': 21,
+    'OCTOBER': 20,
+    'NOVEMBER': 20,
+    'DECEMBER': 22,
+}
+
+def _env_working_days(key: str, default: int) -> int:
+    try:
+        val = os.getenv(key)
+        return int(val) if val is not None and val != '' else default
+    except ValueError:
+        return default
+
+"""
+Permite sobrescrever por .env usando nomes completos do mês:
+JANUARY, FEBRUARY, ..., DECEMBER
+(valores representam dias úteis do mês)
+"""
+WORKING_DAYS_BY_MONTH_NAME = {
+    m: _env_working_days(m, d) for m, d in _DEFAULT_WORKING_DAYS.items()
+}
+
+# Mapeia para código numérico do mês 'MM' -> horas (dias * 8)
+_MONTH_CODE_MAP = {
+    '01': 'JANUARY', '02': 'FEBRUARY', '03': 'MARCH', '04': 'APRIL', '05': 'MAY', '06': 'JUNE',
+    '07': 'JULY', '08': 'AUGUST', '09': 'SEPTEMBER', '10': 'OCTOBER', '11': 'NOVEMBER', '12': 'DECEMBER'
+}
+
+WORKING_HOURS_BY_MONTH = {
+    code: WORKING_DAYS_BY_MONTH_NAME[name] * 8 for code, name in _MONTH_CODE_MAP.items()
+}

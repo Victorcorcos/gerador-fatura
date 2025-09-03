@@ -11,7 +11,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from datetime import datetime
-from config import PDF_CONFIG
+from config import PDF_CONFIG, WORKING_HOURS_BY_MONTH
 
 
 class GerarPDF:
@@ -42,7 +42,7 @@ class GerarPDF:
 
         # Seção de resumo por task
         elementos.append(Paragraph("<b>Totais</b>", self.estilos['subtitulo']))
-        tabela_resumo = self._criar_tabela_resumo(resultados, taxa_hora)
+        tabela_resumo = self._criar_tabela_resumo(resultados, taxa_hora, info_fatura)
         elementos.extend([tabela_resumo, Spacer(1, 0.3 * inch)])
         
         doc.build(elementos)
@@ -191,7 +191,7 @@ class GerarPDF:
         
         return tabela, total_geral
 
-    def _criar_tabela_resumo(self, resultados, taxa_hora):
+    def _criar_tabela_resumo(self, resultados, taxa_hora, info_fatura):
         cabecalho = [
             "Categoria",
             "Horas (H)",
@@ -200,28 +200,41 @@ class GerarPDF:
         ]
         dados = [cabecalho]
         total_horas = 0.0
-        total_valor = 0.0
 
         for task, df_task in resultados.items():
             if df_task.empty:
                 continue
             horas = float(df_task['duration'].sum())
-            total = horas * taxa_hora
             total_horas += horas
-            total_valor += total
             dados.append([
                 Paragraph(f"Horas Mensais ({task})", self.estilos['normal']),
                 f"{horas:.2f}".replace('.', ','),
-                f"{taxa_hora:.2f}".replace('.', ','),
-                f"{total:.2f}".replace('.', ',')
+                "",
+                ""
             ])
+
+        # Linha Total (Cobrado) - baseada nas horas do mês (config)
+        try:
+            # Usa a data de início do período para identificar o mês (formato dd/mm/YYYY)
+            data_inicio = info_fatura.get('data_desenvolvimento_inicio')
+            mes_codigo = data_inicio.split('/')[1] if isinstance(data_inicio, str) and '/' in data_inicio else None
+            horas_cobradas = WORKING_HOURS_BY_MONTH.get(mes_codigo, 0)
+        except Exception:
+            horas_cobradas = 0
+        total_cobrado = horas_cobradas * taxa_hora
+        dados.append([
+            Paragraph("<b>Total (Cobrado)</b>", self.estilos['normal']),
+            f"{horas_cobradas:.2f}".replace('.', ','),
+            f"{taxa_hora:.2f}".replace('.', ','),
+            f"{total_cobrado:.2f}".replace('.', ',')
+        ])
 
         # Linha Total Geral
         dados.append([
             Paragraph("<b>Total Geral</b>", self.estilos['normal']),
             f"{total_horas:.2f}".replace('.', ','),
-            f"{taxa_hora:.2f}".replace('.', ','),
-            f"{total_valor:.2f}".replace('.', ',')
+            "",
+            ""
         ])
 
         tabela = Table(dados, colWidths=[220, 80, 100, 120])
@@ -240,8 +253,12 @@ class GerarPDF:
             ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
             ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
         ])
-        # Estilo para a última linha (Total Geral)
-        last_row = len(dados) - 1
+        # Estilo para linhas finais: Total (Cobrado) e Total Geral
+        last_row = len(dados) - 1  # Total Geral
+        cobr_row = len(dados) - 2  # Total (Cobrado)
+        estilo.add('BACKGROUND', (0, cobr_row), (-1, cobr_row), colors.lightgrey)
+        estilo.add('FONTNAME', (0, cobr_row), (-1, cobr_row), 'Helvetica-Bold')
+        estilo.add('LINEABOVE', (0, cobr_row), (-1, cobr_row), 1, colors.black)
         estilo.add('BACKGROUND', (0, last_row), (-1, last_row), colors.lightgrey)
         estilo.add('FONTNAME', (0, last_row), (-1, last_row), 'Helvetica-Bold')
         estilo.add('LINEABOVE', (0, last_row), (-1, last_row), 1, colors.black)
