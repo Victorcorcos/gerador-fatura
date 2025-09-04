@@ -127,8 +127,7 @@ When prompted with **"draft a pull request"**:
 
 2. **Create a Markdown draft**
    * Produce content that can be pasted directly into the PR **title** and **description** fields.
-   * **Structure** the description with the template imported below:
-     @digitalize-api/.github/pull_request_template.md
+   * **Structure** the description with the template imported below: .github/pull_request_template.md
    * Enhance clarity with markdown code fences with language tags, colors, tables, blockquotes for callouts, admonitions (GitHub alerts), mermaid diagrams, images, collapsible details and etc.
 
 3. **Write the Test Guidance section**
