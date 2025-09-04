@@ -11,3 +11,6 @@ venv/
 
 # Environment variables
 .env
+
+# Logs
+.claude/
