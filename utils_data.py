@@ -5,6 +5,7 @@ Utilitários para manipulação de datas e períodos.
 
 from datetime import datetime
 from calendar import monthrange
+import os
 
 
 class UtilsData:
@@ -28,9 +29,16 @@ class UtilsData:
     
     @staticmethod
     def formatar_nome_arquivo(numero_fatura, data_inicio, data_fim):
+        # Criar diretório faturas se não existir
+        faturas_dir = "faturas"
+        if not os.path.exists(faturas_dir):
+            os.makedirs(faturas_dir)
+        
         data_inicio_fmt = data_inicio.replace('/', '-')
         data_fim_fmt = data_fim.replace('/', '-')
-        return f"Fatura_{numero_fatura}_{data_inicio_fmt}_a_{data_fim_fmt}.pdf"
+        filename = f"Fatura_{numero_fatura}_{data_inicio_fmt}_a_{data_fim_fmt}.pdf"
+        
+        return os.path.join(faturas_dir, filename)
     
     @staticmethod
     def validar_formato_data(data_str, formato="%d/%m/%Y"):

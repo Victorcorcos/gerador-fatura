@@ -13,6 +13,7 @@ gerador-fatura/
 ├── gerar_PDF.py          # Geração de PDF
 ├── utils_data.py         # Utilitários de data
 ├── requirements.txt      # Dependências
+├── faturas/              # Diretório onde os PDFs são salvos
 └── README.md             # Este arquivo
 ```
 
@@ -20,7 +21,8 @@ gerador-fatura/
 
 ### Pré-requisitos
 - Python **3.10 ou superior**
-- `git` instalado
+- Python 3.10 venv instalado (`apt install python3.10-venv`)
+- `git` instalado (`sudo apt install -y git`)
 
 ### Clone o repositório
 
@@ -52,40 +54,53 @@ pip install -r requirements.txt
 
 ## Configuração
 
-Antes de usar o sistema, configure o arquivo `config.py`:
+### Variáveis de Ambiente
 
-### Credenciais de Login
+O sistema agora utiliza variáveis de ambiente para configurações sensíveis. Crie um arquivo `.env` baseado no template `.env.example`:
 
-```python
-LOGIN_CREDENTIALS = {
-    "email": "seu.email@exemplo.com",
-    "password": "sua_senha_aqui"
-}
+```bash
+cp .env.example .env
 ```
 
-### Configurações da Fatura
+Edite o arquivo `.env` com suas informações:
 
-```python
-NUMERO_FATURA = "3"
-TAXA_HORA = 1.0
-MES_COMPLETO = "06/2025"  # Formato: MM/YYYY
+```bash
+# API Credentials
+EMAIL=seu.email@exemplo.com
+PASSWORD=sua_senha_aqui
+
+# Company Information
+RAZAO_SOCIAL=Sua Empresa LTDA
+CNPJ=00.000.000/0001-00
+ENDERECO=Seu Endereço Completo
+PIX=seu-pix@email.com
+
+# Client Information
+CLIENTE_NOME=Nome do Cliente LTDA
+CLIENTE_CNPJ=00.000.000/0001-00
+CLIENTE_ENDERECO=Endereço do Cliente
+
+# Invoice Configuration
+NUMERO_FATURA=1
+TAXA_HORA=60.0
+MES_COMPLETO=08/2025
+TAGS_INTERESSE=development,meeting
 ```
 
-### Informações Pessoais
+**Configurações importantes:**
+- `MES_COMPLETO`: Período da fatura no formato MM/YYYY (se não especificado, usa o mês anterior automaticamente)
+- `TAXA_HORA`: Valor da hora trabalhada 
+- `TAGS_INTERESSE`: Tags de timesheet separadas por vírgula (ex: `development,meeting,tests`)
 
-Edite a seção `INFO_FATURA` com seus dados:
-- Razão social
-- CNPJ
-- Endereço
-- Dados do cliente
-- etc.
-
+⚠️ **Importante**: O arquivo `.env` contém informações sensíveis e não deve ser commitado no git. Ele já está incluído no `.gitignore`.
 ## Uso
 
 Execute o arquivo principal:
 
 ```bash
 python gerador_fatura.py
+# ou
+python3 gerador_fatura.py
 ```
 
 O sistema irá:
@@ -156,13 +171,13 @@ O sistema possui tratamento de erros para:
 
 ## Arquivos Gerados
 
-Os PDFs são salvos no formato:
+Os PDFs são automaticamente salvos no diretório `faturas/` (criado automaticamente se não existir) no formato:
 
 ```
-Fatura_[NUMERO]_[DATA_INICIO]_a_[DATA_FIM].pdf
+faturas/Fatura_[NUMERO]_[DATA_INICIO]_a_[DATA_FIM].pdf
 ```
 
-Exemplo: `Fatura_3_01-06-2025_a_30-06-2025.pdf`
+Exemplo: `faturas/Fatura_3_01-06-2025_a_30-06-2025.pdf`
 
 ## Dependências
 
@@ -170,6 +185,7 @@ Exemplo: `Fatura_3_01-06-2025_a_30-06-2025.pdf`
 - `pandas`: Para manipulação de dados
 - `reportlab`: Para geração de PDF
 - `python-dateutil`: Para manipulação de datas
+- `python-dotenv`: Para carregamento de variáveis de ambiente
 
 ## Troubleshooting
 

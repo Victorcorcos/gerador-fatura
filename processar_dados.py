@@ -22,15 +22,22 @@ class ProcessarDados:
         
         for registro in dados_api:
             dynamic_fields = registro.get('dynamicFields', {})
+            dynamic_associations = registro.get('dynamicAssociations', {})
             
             start_date_str = dynamic_fields.get('start_date', '')
             description = dynamic_fields.get('description', '')
             duration_str = dynamic_fields.get('duration', '0')
             tag = dynamic_fields.get('tag', 'development')
-            task = dynamic_fields.get('task', '')
+            # Nome da task vem de dynamicAssociations.task
+            task_name = dynamic_associations.get('task', '').strip() if isinstance(dynamic_associations.get('task', ''), str) else ''
+            # ID da task (quando existir) pode aparecer em dynamicFields.task
+            task_id = dynamic_fields.get('task', '')
             
-            if not description and task:
-                description = task
+            # Se não houver descrição, tenta usar o nome da task; se não houver, usa o id; caso contrário, marca como sem descrição
+            if not description and task_name:
+                description = task_name
+            elif not description and task_id:
+                description = str(task_id)
             elif not description and not task:
                 description = 'Sem descrição'
             
@@ -56,10 +63,11 @@ class ProcessarDados:
                 'start_date': start_date_dt,
                 'description': description,
                 'duration': duration,
-                'tag': tag
+                'tag': tag,
+                'task_name': task_name
             })
         
-        return self._agrupar_por_tag(registros_processados, data_inicio, data_fim)
+        return self._agrupar_por_task(registros_processados, data_inicio, data_fim)
     
     def _processar_data(self, start_date_str):
         if 'T' in start_date_str:
@@ -76,26 +84,33 @@ class ProcessarDados:
         
         return datetime.combine(start_date, datetime.min.time())
     
-    def _agrupar_por_tag(self, registros_processados, data_inicio, data_fim):
+    def _agrupar_por_task(self, registros_processados, data_inicio, data_fim):
         df = pd.DataFrame(registros_processados)
-        
+
         if df.empty:
             print(f"Nenhum registro encontrado entre {data_inicio} e {data_fim}")
             return {}
-        
+
+        # Considera todos os registros independentemente da tag; inclui também os sem nome de task
+        df = df.copy()
+        df['task_group'] = df['task_name'].fillna('').astype(str).str.strip()
+        df.loc[df['task_group'] == '', 'task_group'] = 'Sem task'
+
         resultados = {}
-        
-        for tag in self.tags_interesse:
-            tag_df = df[df['tag'] == tag]
-            
-            if tag_df.empty:
-                print(f"Nenhum registro encontrado para a tag '{tag}'")
+
+        # Para cada task, agrega as descrições e soma a duração
+        for task in sorted(df['task_group'].unique()):
+            task_df = df[df['task_group'] == task]
+            if task_df.empty:
                 continue
-            
-            agrupado = tag_df.groupby('description')['duration'].sum()\
-                            .reset_index()\
-                            .sort_values('duration', ascending=False)
-            
-            resultados[tag] = agrupado
-        
+
+            agrupado = (
+                task_df.groupby('description')['duration']
+                .sum()
+                .reset_index()
+                .sort_values('duration', ascending=False)
+            )
+
+            resultados[task] = agrupado
+
         return resultados
