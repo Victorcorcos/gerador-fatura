@@ -116,3 +116,24 @@ python gerador_fatura.py
 3. Test changes by running the main script
 4. Verify PDF output is generated correctly
 5. Check that no sensitive data is exposed in commits
+
+## Pull Request Guidance
+
+When prompted with **"draft a pull request"**:
+
+1. **Analyze changes**
+   * Compare everything done on the current branch against `master`/`main` branch of `upstream`.
+   * Summarize all relevant commits, file modifications, and key impacts.
+
+2. **Create a Markdown draft**
+   * Produce content that can be pasted directly into the PR **title** and **description** fields.
+   * **Structure** the description with the template imported below:
+     @digitalize-api/.github/pull_request_template.md
+   * Enhance clarity with markdown code fences with language tags, colors, tables, blockquotes for callouts, admonitions (GitHub alerts), mermaid diagrams, images, collapsible details and etc.
+
+3. **Write the Test Guidance section**
+   * Assume a tester is going to test the changes proposed on this pull request.
+   * Describe step-by-step checks needs to be performed to carefully test it.
+
+4. **Generate a Markdown file**
+   * Generate a `pull_request.md` file containing the Pull Request title and description
