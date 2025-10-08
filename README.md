@@ -19,7 +19,45 @@ gerador-fatura/
 
 ## Instalação
 
-### Pré-requisitos
+### Pré-requisitos do Sistema
+
+Antes de instalar o Python e as dependências do projeto, certifique-se de que as bibliotecas de desenvolvimento necessárias estão instaladas:
+
+#### Ubuntu/Debian
+```bash
+sudo apt-get update
+sudo apt-get install -y libbz2-dev libsqlite3-dev liblzma-dev libreadline-dev libssl-dev libffi-dev zlib1g-dev
+```
+
+#### Fedora/RHEL/CentOS
+```bash
+sudo dnf install -y bzip2-devel sqlite-devel xz-devel readline-devel openssl-devel libffi-devel zlib-devel
+```
+
+#### macOS
+```bash
+brew install bzip2 sqlite xz readline openssl libffi zlib
+```
+
+**Por que essas bibliotecas são necessárias?**
+
+Estas bibliotecas de desenvolvimento são necessárias para compilar módulos built-in do Python (como `_bz2`, `_sqlite3`, `_lzma`). Se o Python for instalado sem essas bibliotecas, você encontrará erros do tipo `ModuleNotFoundError` ao executar o projeto.
+
+**Nota para usuários de gerenciadores de versão Python (asdf, pyenv, etc.):**
+
+Se você usa `asdf`, `pyenv` ou similar, instale as bibliotecas acima **antes** de instalar a versão do Python. Caso contrário, será necessário reinstalar o Python após instalar as bibliotecas:
+
+```bash
+# Para asdf
+asdf uninstall python 3.10.16
+asdf install python 3.10.16
+
+# Para pyenv
+pyenv uninstall 3.10.16
+pyenv install 3.10.16
+```
+
+### Pré-requisitos de Software
 - Python **3.10 ou superior**
 - Python 3.10 venv instalado (`apt install python3.10-venv`)
 - `git` instalado (`sudo apt install -y git`)
@@ -35,9 +73,9 @@ cd gerador-fatura
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate  # Linux/macOS
+source venv/bin/activate # Linux/macOS
 # ou
-venv\Scripts\activate.bat  # Windows
+venv\Scripts\activate.bat # Windows
 ```
 
 ### Atualize o gerenciador de pacotes
