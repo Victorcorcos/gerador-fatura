@@ -1,8 +1,8 @@
-# Gerador de Faturas
+# Gerador de Faturas 🧾
 
 Sistema automatizado para geração de faturas baseado em dados de timesheet obtidos via API GraphQL.
 
-## Estrutura do Projeto
+## Estrutura do Projeto 🏗️
 
 ```
 gerador-fatura/
@@ -17,7 +17,33 @@ gerador-fatura/
 └── README.md             # Este arquivo
 ```
 
-## Instalação
+## Uso 🚀
+
+Execute o arquivo principal:
+
+```bash
+python gerador_fatura.py
+# ou
+python3 gerador_fatura.py
+```
+
+O sistema irá:
+1. Fazer login na API
+2. Buscar dados de timesheet do período configurado
+3. Processar os dados
+4. Gerar um PDF com a fatura
+
+## Arquivos Gerados 📂
+
+Os PDFs são automaticamente salvos no diretório `faturas/` (criado automaticamente se não existir) no formato:
+
+```
+faturas/Fatura_[NUMERO]_[DATA_INICIO]_a_[DATA_FIM].pdf
+```
+
+Exemplo: `faturas/Fatura_3_01-06-2025_a_30-06-2025.pdf`
+
+## Instalação ⬇️
 
 ### Pré-requisitos do Sistema
 
@@ -90,7 +116,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Configuração
+## Configuração ⚙️
 
 ### Variáveis de Ambiente
 
@@ -133,21 +159,7 @@ TAGS_INTERESSE=development,meeting
 ⚠️ **Importante**: O arquivo `.env` contém informações sensíveis e não deve ser commitado no git. Ele já está incluído no `.gitignore`.
 ## Uso
 
-Execute o arquivo principal:
-
-```bash
-python gerador_fatura.py
-# ou
-python3 gerador_fatura.py
-```
-
-O sistema irá:
-1. Fazer login na API
-2. Buscar dados de timesheet do período configurado
-3. Processar os dados
-4. Gerar um PDF com a fatura
-
-## Estrutura dos Módulos
+## Estrutura dos Módulos 🧩
 
 ### `gerador_fatura.py`
 Arquivo principal que orquestra todo o processo.
@@ -178,7 +190,7 @@ Utilitários para manipulação de datas:
 - Formatação de nomes de arquivo
 - Validação de datas
 
-## Personalização
+## Personalização 👤
 
 ### Adicionar Novas Tags
 
@@ -187,63 +199,3 @@ Edite a lista `TAGS_INTERESSE` no arquivo `config.py`:
 ```python
 TAGS_INTERESSE = ['development', 'meeting', 'tests', 'nova_tag']
 ```
-
-### Modificar Layout do PDF
-
-Edite os métodos em `gerar_PDF.py` para personalizar:
-- Estilos de texto
-- Cores das tabelas
-- Estrutura do documento
-
-### Alterar Formato de Datas
-
-Modifique os métodos em `utils_data.py` para diferentes formatos.
-
-## Tratamento de Erros
-
-O sistema possui tratamento de erros para:
-- Falhas de autenticação
-- Problemas de conexão com API
-- Dados inválidos
-- Erros na geração de PDF
-
-## Arquivos Gerados
-
-Os PDFs são automaticamente salvos no diretório `faturas/` (criado automaticamente se não existir) no formato:
-
-```
-faturas/Fatura_[NUMERO]_[DATA_INICIO]_a_[DATA_FIM].pdf
-```
-
-Exemplo: `faturas/Fatura_3_01-06-2025_a_30-06-2025.pdf`
-
-## Dependências
-
-- `requests`: Para comunicação com API
-- `pandas`: Para manipulação de dados
-- `reportlab`: Para geração de PDF
-- `python-dateutil`: Para manipulação de datas
-- `python-dotenv`: Para carregamento de variáveis de ambiente
-
-## Troubleshooting
-
-### Erro de Autenticação
-
-Verifique se:
-- Email e senha estão corretos no `config.py`
-- A API está acessível
-- As credenciais têm permissões adequadas
-
-### Nenhum Dado Encontrado
-
-Verifique se:
-- O período está correto
-- Existem dados de timesheet para o período
-- As tags estão configuradas corretamente
-
-### Erro na Geração do PDF
-
-Verifique se:
-- Todas as dependências estão instaladas
-- Há permissão de escrita no diretório
-- Os dados processados são válidos
