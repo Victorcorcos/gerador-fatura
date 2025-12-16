@@ -229,10 +229,20 @@ class GerarPDF:
             ""
         ])
 
-        # Linha Horas Extras (Acumuladas) = HORAS_EXTRA + (TOTAL - COBRADAS)
+        diff = total_horas - float(horas_cobradas)
+
+        # Nova linha: Horas Extras (Mês) = Horas Mensais (TOTAL) - Horas Totais (Cobradas)
+        dados.append([
+            Paragraph("Horas Extras (Mês)", self.estilos['normal']),
+            f"{diff:.2f}".replace('.', ','),
+            "",
+            ""
+        ])
+
+        # Linha Horas Extras (TOTAL) = HORAS_EXTRA + (TOTAL - COBRADAS)
         horas_extras = float(HORAS_EXTRA) + (total_horas - float(horas_cobradas))
         dados.append([
-            Paragraph("Horas Extras (Acumuladas)", self.estilos['normal']),
+            Paragraph("Horas Extras (TOTAL)", self.estilos['normal']),
             f"{horas_extras:.2f}".replace('.', ','),
             "",
             ""
@@ -273,16 +283,16 @@ class GerarPDF:
         for i, row in enumerate(dados):
             if isinstance(row[0], Paragraph):
                 txt = row[0].text
-                if 'Horas Extras (Acumuladas)' in txt and 'TOTAL' not in txt and 'Totais' not in txt:
+                if 'Horas Extras (TOTAL)' in txt:
                     row_idx_horas_extras = i
                     break
 
         # Monta mensagem explicativa para a anotação
         def fmt2(v):
             return f"{v:.2f}".replace('.', ',')
-        diff = total_horas - float(horas_cobradas)
+        # diff já calculado anteriormente
         explicacao = (
-            "Cálculo das Horas Extras (Acumuladas):\n"
+            "Cálculo das Horas Extras (TOTAL):\n"
             "HORAS_EXTRA + (Horas Mensais (TOTAL) - Horas Totais (Cobradas))\n"
             f"{fmt2(float(HORAS_EXTRA))} + ({fmt2(total_horas)} - {fmt2(horas_cobradas)})\n"
             f"{fmt2(float(HORAS_EXTRA))} + {fmt2(diff)}\n"
