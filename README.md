@@ -22,9 +22,9 @@ gerador-fatura/
 Execute o arquivo principal:
 
 ```bash
-python gerador_fatura.py
-# ou
 python3 gerador_fatura.py
+# ou
+python gerador_fatura.py
 ```
 
 O sistema irá:

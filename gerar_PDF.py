@@ -11,7 +11,13 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from datetime import datetime
-from config import PDF_CONFIG, WORKING_HOURS_BY_MONTH, HORAS_EXTRA
+from config import (
+    PDF_CONFIG,
+    WORKING_HOURS_BY_MONTH,
+    HORAS_EXTRA,
+    INTERNET_VALOR,
+    TRANSPORTE_VALOR,
+)
 
 
 class GerarPDF:
@@ -37,17 +43,17 @@ class GerarPDF:
         elementos.extend(self._criar_informacoes_fatura(info_fatura))
         elementos.append(Paragraph("<b>DETALHES DOS SERVIÇOS</b>", 
                                  self.estilos['subtitulo']))
-        tabela_servicos, total_geral = self._criar_tabela_servicos(resultados, taxa_hora)
+        tabela_servicos, _ = self._criar_tabela_servicos(resultados, taxa_hora)
         elementos.extend([tabela_servicos, Spacer(1, 0.5 * inch)])
 
         # Seção de resumo por task
         elementos.append(Paragraph("<b>Totais</b>", self.estilos['subtitulo']))
-        tabela_resumo = self._criar_tabela_resumo(resultados, taxa_hora, info_fatura)
+        tabela_resumo, total_cobrado_final = self._criar_tabela_resumo(resultados, taxa_hora, info_fatura)
         elementos.extend([tabela_resumo, Spacer(1, 0.3 * inch)])
         
         doc.build(elementos)
         
-        return nome_arquivo, total_geral
+        return nome_arquivo, total_cobrado_final
 
     def _criar_estilos(self):
         estilos = getSampleStyleSheet()
@@ -258,8 +264,8 @@ class GerarPDF:
         ])
         row_total_cobrado = len(dados) - 1
 
-        # Linha Internet (valor fixo 120, sem horas e taxa)
-        internet_valor = 120.0
+        # Linha Internet (valor fixo, sem horas e taxa)
+        internet_valor = INTERNET_VALOR
         dados.append([
             Paragraph("Internet", self.estilos['normal']),
             "",
@@ -268,9 +274,19 @@ class GerarPDF:
         ])
         row_internet = len(dados) - 1
 
+        # Linha Transporte (valor fixo, sem horas e taxa)
+        transporte_valor = TRANSPORTE_VALOR
+        dados.append([
+            Paragraph("Transporte", self.estilos['normal']),
+            "",
+            "",
+            self._fmt_brl(transporte_valor)
+        ])
+        row_transporte = len(dados) - 1
+
         # Linha Total (Cobrado) - consolidado final
-        # Total (Cobrado) final: soma de Horas Totais (Cobradas) + Internet
-        total_cobrado_final = total_cobrado + internet_valor
+        # Total (Cobrado) final: soma de Horas Totais (Cobradas) + adicionais fixos
+        total_cobrado_final = total_cobrado + internet_valor + transporte_valor
         dados.append([
             Paragraph("<b>Total (Cobrado)</b>", self.estilos['normal']),
             "",
@@ -326,13 +342,14 @@ class GerarPDF:
         estilo.add('BACKGROUND', (0, row_total_cobrado), (-1, row_total_cobrado), colors.lightgrey)
         estilo.add('FONTNAME', (0, row_total_cobrado), (-1, row_total_cobrado), 'Helvetica-Bold')
         estilo.add('LINEABOVE', (0, row_total_cobrado), (-1, row_total_cobrado), 1, colors.black)
-        # Internet: fundo cinza como as demais linhas de totalização
+        # Internet e Transporte: fundo cinza como as demais linhas de totalização
         estilo.add('BACKGROUND', (0, row_internet), (-1, row_internet), colors.lightgrey)
+        estilo.add('BACKGROUND', (0, row_transporte), (-1, row_transporte), colors.lightgrey)
         estilo.add('BACKGROUND', (0, last_row), (-1, last_row), colors.lightgrey)
         estilo.add('FONTNAME', (0, last_row), (-1, last_row), 'Helvetica-Bold')
         estilo.add('LINEABOVE', (0, last_row), (-1, last_row), 1, colors.black)
         tabela.setStyle(estilo)
-        return tabela
+        return tabela, total_cobrado_final
 
     def _estilo_tabela_servicos(self, num_linhas, resultados):
         estilo = TableStyle([

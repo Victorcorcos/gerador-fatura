@@ -48,14 +48,14 @@ class GeradorFatura:
             )
             
             print("Gerando PDF...")
-            pdf_gerado, total = self.gerar_PDF.gerar_pdf_fatura(
+            pdf_gerado, total_final = self.gerar_PDF.gerar_pdf_fatura(
                 resultados, info_fatura, nome_arquivo_pdf, TAXA_HORA
             )
             
             print(f"\nFatura gerada com sucesso: {pdf_gerado}")
-            print(f"Valor total da fatura: R$ {total:.2f}")
+            print(f"Valor total da fatura: R$ {total_final:.2f}")
             
-            return pdf_gerado, total
+            return pdf_gerado, total_final
             
         except Exception as e:
             print(f"Erro ao processar: {e}")

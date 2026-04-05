@@ -56,6 +56,8 @@ def _env_float(name: str, default: float = 0.0) -> float:
         return default
 
 HORAS_EXTRA = _env_float("HORAS_EXTRA", 0.0)
+INTERNET_VALOR = _env_float("INTERNET_VALOR", 120.0)
+TRANSPORTE_VALOR = _env_float("TRANSPORTE_VALOR", 160.0)
 
 # Dias úteis por mês (substituível por variáveis de ambiente WORKING_DAYS_*)
 _DEFAULT_WORKING_DAYS = {
