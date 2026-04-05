@@ -5,7 +5,7 @@ Responsável por criar o documento PDF com os dados processados.
 """
 
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Flowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Flowable, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -47,9 +47,15 @@ class GerarPDF:
         elementos.extend([tabela_servicos, Spacer(1, 0.5 * inch)])
 
         # Seção de resumo por task
-        elementos.append(Paragraph("<b>Totais</b>", self.estilos['subtitulo']))
+        # Mantém o bloco de totais inteiro: se não couber no fim da página atual,
+        # o ReportLab move para o topo da próxima página.
         tabela_resumo, total_cobrado_final = self._criar_tabela_resumo(resultados, taxa_hora, info_fatura)
-        elementos.extend([tabela_resumo, Spacer(1, 0.3 * inch)])
+        bloco_totais = KeepTogether([
+            Paragraph("<b>Totais</b>", self.estilos['subtitulo']),
+            tabela_resumo,
+            Spacer(1, 0.3 * inch)
+        ])
+        elementos.append(bloco_totais)
         
         doc.build(elementos)
         
