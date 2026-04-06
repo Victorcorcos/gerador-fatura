@@ -107,6 +107,16 @@ class GerarPDF:
         except Exception:
             return f"R$ {valor:.2f}"
 
+    def _calcular_horas_cobradas(self, total_horas, info_fatura):
+        try:
+            data_inicio = info_fatura.get('data_desenvolvimento_inicio')
+            mes_codigo = data_inicio.split('/')[1] if isinstance(data_inicio, str) and '/' in data_inicio else None
+            horas_mes = float(WORKING_HOURS_BY_MONTH.get(mes_codigo, 0))
+        except Exception:
+            horas_mes = 0.0
+
+        return min(float(total_horas), horas_mes) if horas_mes > 0 else float(total_horas)
+
     def _criar_tabela_emissor_cliente(self, info):
         elementos = []
         
@@ -213,14 +223,6 @@ class GerarPDF:
         dados = [cabecalho]
         total_horas = 0.0
 
-        # Determina horas cobradas do mês (para usar em diferentes linhas)
-        try:
-            data_inicio = info_fatura.get('data_desenvolvimento_inicio')
-            mes_codigo = data_inicio.split('/')[1] if isinstance(data_inicio, str) and '/' in data_inicio else None
-            horas_cobradas = WORKING_HOURS_BY_MONTH.get(mes_codigo, 0)
-        except Exception:
-            horas_cobradas = 0
-
         for task, df_task in resultados.items():
             if df_task.empty:
                 continue
@@ -241,6 +243,8 @@ class GerarPDF:
             ""
         ])
 
+        horas_cobradas = self._calcular_horas_cobradas(total_horas, info_fatura)
+
         diff = total_horas - float(horas_cobradas)
 
         # Nova linha: Horas Extras (Mês) = Horas Mensais (TOTAL) - Horas Totais (Cobradas)
@@ -260,7 +264,7 @@ class GerarPDF:
             ""
         ])
 
-        # Linha Horas Totais (Cobradas) - baseada nas horas do mês (config)
+        # Linha Horas Totais (Cobradas) - limitada pelas horas do mês configuradas
         total_cobrado = horas_cobradas * taxa_hora
         dados.append([
             Paragraph("<b>Horas Totais (Cobradas)</b>", self.estilos['normal']),
