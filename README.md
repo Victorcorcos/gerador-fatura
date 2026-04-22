@@ -1,7 +1,7 @@
 # Gerador de Faturas 🧾
 
 <p align="center">
-  <img src="https://i.imgur.com/QZmUbID.png" alt="Logo" width="40%" />
+  <img src="https://i.imgur.com/1GwVnfg.png" alt="Logo" width="40%" />
 </p>
 
 Sistema automatizado para geração de faturas baseado em dados de timesheet obtidos via API GraphQL.
