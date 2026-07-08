@@ -51,17 +51,17 @@ class ClienteAPI:
     def buscar_dados_timesheet(self, data_inicio, data_fim):
         if not self.token:
             raise Exception("Token não encontrado. Faça login primeiro.")
-        
+
         data_inicio_dt = datetime.strptime(data_inicio, "%d/%m/%Y")
-        
+
         periodo = data_inicio_dt.strftime("%Y-%m")
-        
+
         query_payload = {
             "query": """{
-                records(where: { 
-                    sheet: { key_regex: "timesheet" } 
-                    dynamicFields: { start_date_regex: "%s"}
-                } order: { updatedAt: DESC}) {
+                records(where: {
+                    sheet: { key_regex: "timesheet" }
+                    dynamicFields: { month_regex: "%s" }
+                } order: { updatedAt: DESC }) {
                     count
                     data {
                         id
@@ -75,24 +75,28 @@ class ClienteAPI:
 
         headers_auth = self.headers.copy()
         headers_auth['Authorization'] = self.token
-        
+
         try:
             print("Enviando requisição com autenticação padrão...")
             response = requests.post(API_URL, headers=headers_auth, json=query_payload)
 
             if response.status_code == 200:
                 data = response.json()
+
                 if 'errors' not in data:
-                    print(f"Dados recuperados com sucesso! Total de registros: {data['data']['records']['count']}")
+                    total = data['data']['records']['count']
+                    print(f"Dados recuperados com sucesso! Total de registros: {total}")
                     return data['data']['records']['data']
                 else:
                     print(f"Erro na consulta: {data['errors']}")
             else:
                 print(f"Status {response.status_code} na resposta da API.")
+
         except requests.exceptions.HTTPError as e:
             print(f"Erro HTTP: {e}")
             raise
         except Exception as e:
             print(f"Erro geral: {e}")
             raise
+
         raise Exception("Erro ao buscar dados do timesheet.")
